@@ -12,7 +12,7 @@ module.exports = {
     // 1. CONFIGURATION DE BASE (Session & Database)
     // ===========================================================
     SESSION_ID: process.env.SESSION_ID || "MINI BOT", 
-    MONGODB_URI: process.env.MONGODB_URI || 'mongodb://${{MONGO_INITDB_ROOT_USERNAME}}:${{MONGO_INITDB_ROOT_PASSWORD}}@${{RAILWAY_TCP_PROXY_DOMAIN}}:${{RAILWAY_TCP_PROXY_PORT}}',
+    MONGODB_URI: process.env.MONGODB_URI || 'mongodb://mongo:bnRKeXOAQGYmHmWooWsOBdfKnZnBgRYE@thomas.proxy.rlwy.net:18651',
     
     // ===========================================================
     // 2. INFORMATIONS DU BOT
