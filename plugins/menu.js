@@ -1,82 +1,691 @@
-const { cmd, commands } = require('../inconnuboy');
-const { getUserConfigFromMongoDB } = require('../lib/database');
 const config = require('../config');
-const os = require('os');
+const { cmd, commands } = require('../command');
+const os = require("os");
+const { runtime } = require('../lib/functions');
+const axios = require('axios');
+
+cmd({  
+    pattern: "menu",  
+    desc: "menu the bot",  
+    category: "menu",  
+    react: "⚡",  
+    filename: __filename  
+},   
+async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {  
+    try {  
+        let dec = `💎〔 *${config.BOT_NAME}* 〕💎  
+┃★╭──────────────  
+┃★│ Owner : *${config.OWNER_NAME}*  
+┃★│ Baileys : *Multi Device*  
+┃★│ Type : *NodeJs*  
+┃★│ Platform : *Heroku*  
+┃★│ Mode : *[${config.MODE}]*  
+┃★│ Prifix : *[${config.PREFIX}]*  
+┃★│ Version : *5.0.0 Bᴇᴛᴀ*  
+┃★╰──────────────  
+╰━━━━━━━━━━━━━━━┈⊷  
+╭━━〔 *Menu List* 〕━━┈⊷  
+┃◈╭─────────────·๏  
+┃◈┃📿 • Surahmenu  
+┃◈┃🕌 • Prayertime  
+┃◈┃🤖 • Aimenu  
+┃◈┃🧚 • Animenu  
+┃◈┃💫 • Reactions  
+┃◈┃🔁 • Convertmenu  
+┃◈┃🎭 • Funmenu  
+┃◈┃📥 • Dlmenu  
+┃◈┃📋 • List  
+┃◈┃🏠 • Mainmenu  
+┃◈┃👥 • Groupmenu  
+┃◈┃📦 • Allmenu  
+┃◈┃👑 • Ownermenu  
+┃◈┃⚙️ • Othermenu  
+┃◈┃💫 • Reactions  
+┃◈└───────────┈⊷  
+╰──────────────┈⊷  
+> ${config.DESCRIPTION}`;  
+  
+        await conn.sendMessage(  
+            from,  
+            {  
+                image: { url: `https://files.catbox.moe/6ez5um.png` },  
+                caption: dec,  
+                contextInfo: {  
+                    mentionedJid: [m.sender],  
+                    forwardingScore: 999,  
+                    isForwarded: true,  
+                    forwardedNewsletterMessageInfo: {  
+                        newsletterJid: '120363420828095666@newsletter',  
+                        newsletterName: '𝗙𝗜𝗫𝗢 𝗫𝗠𝗗',  
+                        serverMessageId: 143  
+                    }  
+                }  
+            },  
+            { quoted: mek }  
+        );  
+  
+    } catch (e) {  
+        console.log(e);  
+        reply(`${e}`);  
+    }  
+});
 
 cmd({
-    pattern: 'menu',
-    alias: ['help', 'cmds', 'commands'],
-    desc: 'Show all commands by category',
-    category: 'general',
-    react: '📋'
-}, async (conn, mek, m, { from, sender, isOwner, reply }) => {
+    pattern: "reactions",
+    desc: "Shows the reaction commands",
+    category: "menu",
+    react: "💫",
+    filename: __filename
+}, 
+async (conn, mek, m, { from, quoted, reply }) => {
     try {
-        const number = sender.split('@')[0];
-        const userConfig = await getUserConfigFromMongoDB(number);
+        let dec = `╭━━〔 *Reactions Menu* 〕━━┈⊷
+┃◈╭─────────────·๏
+┃◈┃😈 • bully @tag
+┃◈┃🤗 • cuddle @tag
+┃◈┃😭 • cry @tag
+┃◈┃🤗 • hug @tag
+┃◈┃🐺 • awoo @tag
+┃◈┃💋 • kiss @tag
+┃◈┃👅 • lick @tag
+┃◈┃👏 • pat @tag
+┃◈┃😏 • smug @tag
+┃◈┃🔨 • bonk @tag
+┃◈┃🗑️ • yeet @tag
+┃◈┃😊 • blush @tag
+┃◈┃😁 • smile @tag
+┃◈┃👋 • wave @tag
+┃◈┃✋ • highfive @tag
+┃◈┃🤝 • handhold @tag
+┃◈┃🍽️ • nom @tag
+┃◈┃🦷 • bite @tag
+┃◈┃🫂 • glomp @tag
+┃◈┃👋🏻 • slap @tag
+┃◈┃🔪 • kill @tag
+┃◈┃😄 • happy @tag
+┃◈┃😉 • wink @tag
+┃◈┃👉 • poke @tag
+┃◈┃💃 • dance @tag
+┃◈┃😬 • cringe @tag
+┃◈└───────────┈⊷
+╰──────────────┈⊷
+> ${config.DESCRIPTION}`;
 
-        // Group commands by category
-        const categories = {};
-        for (const cmd of commands) {
-            if (cmd.dontAddCommandList) continue;
-            const cat = (cmd.category || 'misc').toLowerCase();
-            if (!categories[cat]) categories[cat] = [];
-            categories[cat].push(cmd);
-        }
-
-        const categoryEmojis = {
-            general: '🌐',
-            group: '👥',
-            settings: '⚙️',
-            owner: '👑',
-            tools: '🔧',
-            fun: '🎭',
-            media: '🎬',
-            misc: '📦'
-        };
-
-        const uptime = process.uptime();
-        const hours = Math.floor(uptime / 3600);
-        const minutes = Math.floor((uptime % 3600) / 60);
-        const seconds = Math.floor(uptime % 60);
-
-        let menuText = `╭──────────────────────◇\n`;
-        menuText += `│  *🤖 DARK DEV MINI — MENU*\n`;
-        menuText += `│──────────────────────\n`;
-        menuText += `│ 👤 User: ${m.pushName || 'User'}\n`;
-        menuText += `│ ⚡ Prefix: [ ${config.PREFIX} ]\n`;
-        menuText += `│ 🕐 Uptime: ${hours}h ${minutes}m ${seconds}s\n`;
-        menuText += `│ 🔌 Mode: ${config.WORK_TYPE || 'public'}\n`;
-        menuText += `│──────────────────────\n`;
-        menuText += `│ ⚙️ Settings Status\n`;
-        menuText += `│ 👁️ Auto View: ${userConfig.AUTO_VIEW_STATUS === 'true' ? 'ON ✅' : 'OFF ❌'}\n`;
-        menuText += `│ 📵 Anti Call: ${userConfig.ANTI_CALL === 'true' ? 'ON ✅' : 'OFF ❌'}\n`;
-        menuText += `│ 🎙️ Auto Record: ${userConfig.AUTO_RECORDING === 'true' ? 'ON ✅' : 'OFF ❌'}\n`;
-        menuText += `│ ⌨️ Auto Typing: ${userConfig.AUTO_TYPING === 'true' ? 'ON ✅' : 'OFF ❌'}\n`;
-        menuText += `│ ✅ Auto Read: ${userConfig.READ_MESSAGE === 'true' ? 'ON ✅' : 'OFF ❌'}\n`;
-        menuText += `╰──────────────────────◇\n\n`;
-
-        // List commands per category
-        const catOrder = ['general', 'group', 'settings', 'owner', 'tools', 'fun', 'media', 'misc'];
-        const sortedCats = [...catOrder.filter(c => categories[c]), ...Object.keys(categories).filter(c => !catOrder.includes(c))];
-
-        for (const cat of sortedCats) {
-            if (!categories[cat] || !categories[cat].length) continue;
-            const emoji = categoryEmojis[cat] || '📦';
-            menuText += `╭─── ${emoji} *${cat.toUpperCase()}* ───\n`;
-            for (const c of categories[cat]) {
-                menuText += `│ ${config.PREFIX}${c.pattern}${c.desc ? ' — ' + c.desc : ''}\n`;
-            }
-            menuText += `╰────────────────────◇\n\n`;
-        }
-
-        menuText += `> *© Powered by FIXO DEV*`;
-
-        await conn.sendMessage(from, {
-            image: { url: config.IMAGE_PATH },
-            caption: menuText
-        }, { quoted: mek });
+        await conn.sendMessage(
+            from,
+            {
+                image: { url: `https://files.catbox.moe/on64af.png` },
+                caption: dec,
+                contextInfo: {
+                    mentionedJid: [m.sender],
+                    forwardingScore: 999,
+                    isForwarded: true,
+                    forwardedNewsletterMessageInfo: {
+                        newsletterJid: '120363420828095666@newsletter',
+                        newsletterName: '𝗙𝗜𝗫𝗢 𝗫𝗠𝗗',
+                        serverMessageId: 144
+                    }
+                }
+            },
+            { quoted: mek }
+        );
 
     } catch (e) {
-        reply('*❌ Menu error: ' + e.message + '*');
+        console.log(e);
+        reply(`${e}`);
+    }
+});
+
+// dlmenu
+
+cmd({
+    pattern: "dlmenu",
+    desc: "menu the bot",
+    category: "menu",
+    react: "⤵️",
+    filename: __filename
+}, 
+async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
+    try {
+        let dec = `╭━━〔 *Download Menu* 〕━━┈⊷
+┃◈╭─────────────·๏
+┃◈┃• 💎 facebook
+┃◈┃• 🌀 facebook2
+┃◈┃• 💡 likee
+┃◈┃• 🔍 tiktoksearch
+┃◈┃• 📲 tiktok
+┃◈┃• 🐦 twitter
+┃◈┃• 📸 Instagram
+┃◈┃• 👻 snapchat
+┃◈┃• 🎬 capcut
+┃◈┃• 🎵 ringtone
+┃◈┃• 📥 apk
+┃◈┃• 🖼️ img
+┃◈┃• 📌 pinterestdl
+┃◈┃• 🔎 spotifysearch
+┃◈┃• 📡 spotifydl
+┃◈┃• 🎧 play
+┃◈┃• 🎶 play3
+┃◈┃• 📹 video
+┃◈┃• 🎼 mp3
+┃◈┃• 🎥 mp4
+┃◈┃• 🔎 yts
+┃◈┃• 📂 mediafire
+┃◈┃• 📂 gdrive 
+┃◈┃• 🔍 ssweb
+┃◈┃• 🐶 dog  
+┃◈└───────────┈⊷
+╰──────────────┈⊷
+> ${config.DESCRIPTION}`;
+
+        await conn.sendMessage(
+            from,
+            {
+                image: { url: `https://files.catbox.moe/cimssc.jpg` },
+                caption: dec,
+                contextInfo: {
+                    mentionedJid: [m.sender],
+                    forwardingScore: 999,
+                    isForwarded: true,
+                    forwardedNewsletterMessageInfo: {
+                        newsletterJid: '120363420828095666@newsletter',
+                        newsletterName: '𝗙𝗜𝗫𝗢 𝗫𝗠𝗗',
+                        serverMessageId: 143
+                    }
+                }
+            },
+            { quoted: mek }
+        );
+
+    } catch (e) {
+        console.log(e);
+        reply(`${e}`);
+    }
+});
+
+// group menu
+
+cmd({
+    pattern: "groupmenu",
+    desc: "menu the bot",
+    category: "menu",
+    react: "⤵️",
+    filename: __filename
+}, 
+async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
+    try {
+        let dec = `╭━━〔 *Group Menu* 〕━━┈⊷
+┃◈╭─────────────·๏
+┃◈┃🔗 • grouplink
+┃◈┃🔗 • jid
+┃◈┃💣 • kickall
+┃◈┃💣 • removecountry +662
+┃◈┃👑 • kickadmins
+┃◈┃➕ • add
+┃◈┃➖ • remove
+┃◈┃🦵 • kick
+┃◈┃🔼 • promote 
+┃◈┃🔽 • demote
+┃◈┃♻️ • revoke
+┃◈┃👋 • left
+┃◈┃📄 • ginfo
+┃◈┃🗑️ • delete 
+┃◈┃✏️ • upgname
+┃◈┃📝 • upgdesc
+┃◈┃🔊 • groupunmute
+┃◈┃🔇 • mute
+┃◈┃🔈 • unmute
+┃◈┃🔒 • lockgc
+┃◈┃🔓 • unlockgc
+┃◈┃🧾 • invite
+┃◈┃🏷️ • tag
+┃◈┃📢 • tagall
+┃◈┃📢 • broadcast
+┃◈┃❤️ • ship
+┃◈┃🧾 • shapar
+┃◈┃🫣 • compatibility
+┃◈┃🤔 • roast
+┃◈┃🥰 • compliment
+┃◈┃😍 • lovetest
+┃◈└───────────┈⊷
+╰──────────────┈⊷
+> ${config.DESCRIPTION}`;
+
+        await conn.sendMessage(
+            from,
+            {
+                image: { url: `https://files.catbox.moe/lkfanv.jpg` },
+                caption: dec,
+                contextInfo: {
+                    mentionedJid: [m.sender],
+                    forwardingScore: 999,
+                    isForwarded: true,
+                    forwardedNewsletterMessageInfo: {
+                        newsletterJid: '120363420828095666@newsletter',
+                        newsletterName: '𝗙𝗜𝗫𝗢 𝗫𝗠𝗗',
+                        serverMessageId: 143
+                    }
+                }
+            },
+            { quoted: mek }
+        );
+
+    } catch (e) {
+        console.log(e);
+        reply(`${e}`);
+    }
+});
+
+// fun menu
+
+cmd({
+    pattern: "funmenu",
+    desc: "menu the bot",
+    category: "menu",
+    react: "😎",
+    filename: __filename
+}, 
+async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
+    try {
+
+        let dec = `╭━━〔 *Fun Menu* 〕━━┈⊷
+┃◈╭─────────────·๏
+┃◈┃💻 • hack
+┃◈┃🤣 • joke
+┃◈┃❤️ • heart
+┃◈┃😄 • happy
+┃◈┃😠 • angry
+┃◈┃😢 • sad
+┃◈┃😳 • shy
+┃◈┃🌙 • moon
+┃◈┃😕 • confused
+┃◈┃🔥 • hot
+┃◈┃🏃 • nikal
+┃◈└───────────┈⊷
+╰──────────────┈⊷
+> ${config.DESCRIPTION}`;
+
+        await conn.sendMessage(
+            from,
+            {
+                image: { url: `https://files.catbox.moe/c7m306.jpg` },
+                caption: dec,
+                contextInfo: {
+                    mentionedJid: [m.sender],
+                    forwardingScore: 999,
+                    isForwarded: true,
+                    forwardedNewsletterMessageInfo: {
+                        newsletterJid: '120363420828095666@newsletter',
+                        newsletterName: '𝗙𝗜𝗫𝗢 𝗫𝗠𝗗',
+                        serverMessageId: 143
+                    }
+                }
+            },
+            { quoted: mek }
+        );
+
+    } catch (e) {
+        console.log(e);
+        reply(`${e}`);
+    }
+});
+
+// other menu
+
+cmd({
+    pattern: "othermenu",
+    desc: "menu the bot",
+    category: "menu",
+    react: "🤖",
+    filename: __filename
+}, 
+async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
+    try {
+        let dec = `╭━━〔 *Other Menu* 〕━━┈⊷
+┃◈╭─────────────·๏
+┃◈┃⏰ • time
+┃◈┃📅 • date
+┃◈┃🔢 • count
+┃◈┃🪙 • coinflip
+┃◈┃🎨 • rcolor
+┃◈┃🎲 • roll
+┃◈┃📚 • fact
+┃◈┃📖 • define
+┃◈┃📰 • news
+┃◈┃🎬 • movie
+┃◈┃☁️ • weather
+┃◈┃🌐 • wikipedia
+┃◈┃🔍 • githubstalk
+┃◈┃🎵 • tiktokstalk
+┃◈┃💻 • webinfo
+┃◈┃🔍 • yts
+┃◈┃🔐 • gpass
+┃◈┃🎞️ • movie
+┃◈┃🕌 • praytime
+┃◈└───────────┈⊷
+╰──────────────┈⊷
+> ${config.DESCRIPTION}`;
+
+        await conn.sendMessage(
+            from,
+            {
+                image: { url: `https://files.catbox.moe/faws7o.jpg` },
+                caption: dec,
+                contextInfo: {
+                    mentionedJid: [m.sender],
+                    forwardingScore: 999,
+                    isForwarded: true,
+                    forwardedNewsletterMessageInfo: {
+                        newsletterJid: '120363420828095666@newsletter',
+                        newsletterName: '𝗙𝗜𝗫𝗢 𝗫𝗠𝗗',
+                        serverMessageId: 143
+                    }
+                }
+            },
+            { quoted: mek }
+        );
+
+    } catch (e) {
+        console.log(e);
+        reply(`${e}`);
+    }
+});
+
+// main menu
+
+cmd({
+    pattern: "mainmenu",
+    desc: "menu the bot",
+    category: "menu",
+    react: "🗿",
+    filename: __filename
+}, 
+async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
+    try {
+        let dec = `╭━━〔 *Main Menu* 〕━━┈⊷
+┃◈╭─────────────·๏
+┃◈┃📶 • ping
+┃◈┃⚡ • speed
+┃◈┃🏓 • pong
+┃◈┃💡 • alive
+┃◈┃⏱️ • runtime
+┃◈┃⏳ • uptime 
+┃◈┃📥 • update
+┃◈┃🧩 • version
+┃◈┃📤 • send
+┃◈┃💾 • save
+┃◈┃🪄 • vv
+┃◈┃🪄 • vv6
+┃◈┃📲 • sendme
+┃◈┃♻️ • restart
+┃◈┃⚙️ • env
+┃◈┃🔧 • setting
+┃◈└───────────┈⊷
+╰──────────────┈⊷
+> ${config.DESCRIPTION}`;
+
+        await conn.sendMessage(
+            from,
+            {
+                image: { url: `https://files.catbox.moe/3ructm.jpg` },
+                caption: dec,
+                contextInfo: {
+                    mentionedJid: [m.sender],
+                    forwardingScore: 999,
+                    isForwarded: true,
+                    forwardedNewsletterMessageInfo: {
+                        newsletterJid: '120363420828095666@newsletter',
+                        newsletterName: '𝗙𝗜𝗫𝗢 𝗫𝗠𝗗',
+                        serverMessageId: 143
+                    }
+                }
+            },
+            { quoted: mek }
+        );
+
+    } catch (e) {
+        console.log(e);
+        reply(`${e}`);
+    }
+});
+
+// owner menu
+
+cmd({
+    pattern: "ownermenu",
+    desc: "menu the bot",
+    category: "menu",
+    react: "🔰",
+    filename: __filename
+}, 
+async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
+    try {
+        let dec = `╭━━〔 *Owner Menu* 〕━━┈⊷
+┃◈╭─────────────·๏
+┃◈┃👑 • owner
+┃◈┃📤 • forward
+┃◈┃📦 • repo
+┃◈┃📜 • script
+┃◈┃🗂️ • sc
+┃◈┃📁 • srepo
+┃◈┃📋 • menu
+┃◈┃🗃️ • allmenu
+┃◈┃📑 • list
+┃◈┃🚫 • block
+┃◈┃✅ • unblock
+┃◈┃♻️ • restart
+┃◈┃🛑 • shutdown
+┃◈┃🤝 • pair
+┃◈┃🔗 • getpair
+┃◈┃🤖 • clonebot
+┃◈┃📶 • siminfo
+┃◈┃📶 • siminfo2
+┃◈┃📝 • report
+┃◈└───────────┈⊷
+╰──────────────┈⊷
+> ${config.DESCRIPTION}`;
+
+        await conn.sendMessage(
+            from,
+            {
+                image: { url: `https://files.catbox.moe/0hvska.png` },
+                caption: dec,
+                contextInfo: {
+                    mentionedJid: [m.sender],
+                    forwardingScore: 999,
+                    isForwarded: true,
+                    forwardedNewsletterMessageInfo: {
+                        newsletterJid: '120363420828095666@newsletter',
+                        newsletterName: '𝗙𝗜𝗫𝗢 𝗫𝗠𝗗',
+                        serverMessageId: 143
+                    }
+                }
+            },
+            { quoted: mek }
+        );
+
+    } catch (e) {
+        console.log(e);
+        reply(`${e}`);
+    }
+});
+
+// convert menu
+
+cmd({
+    pattern: "convertmenu",
+    desc: "menu the bot",
+    category: "menu",
+    react: "🥀",
+    filename: __filename
+}, 
+async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
+    try {
+        let dec = `╭━━〔 *Convert Menu* 〕━━┈⊷
+┃◈╭─────────────·๏
+┃◈┃🖼️ • sticker
+┃◈┃🌐 • fetch
+┃◈┃🎞️ • gif
+┃◈┃😆 • emix 🤩,😀
+┃◈┃🆒 • fancy
+┃◈┃✨ • remini
+┃◈┃🪄 • enhance
+┃◈┃🧼 • removebg
+┃◈┃🖼️ • hd
+┃◈┃🔊 • tts
+┃◈┃🌍 • trt
+┃◈┃🔈 • tts2
+┃◈┃🎙️ • tts3
+┃◈┃🔥 • attp
+┃◈┃🔗 • url
+┃◈┃😊 • emoji
+┃◈┃🎨 • fancy
+┃◈┃📷 • fullpp
+┃◈┃📁 • gitclone
+┃◈┃📄 • topdf
+┃◈┃🖼️ • randomwall
+┃◈└───────────┈⊷
+╰──────────────┈⊷
+> ${config.DESCRIPTION}`;
+
+        await conn.sendMessage(
+            from,
+            {
+                image: { url: `https://files.catbox.moe/rk54m2.jpg` },
+                caption: dec,
+                contextInfo: {
+                    mentionedJid: [m.sender],
+                    forwardingScore: 999,
+                    isForwarded: true,
+                    forwardedNewsletterMessageInfo: {
+                        newsletterJid: '120363420828095666@newsletter',
+                        newsletterName: '𝗙𝗜𝗫𝗢 𝗫𝗠𝗗',
+                        serverMessageId: 143
+                    }
+                }
+            },
+            { quoted: mek }
+        );
+
+    } catch (e) {
+        console.log(e);
+        reply(`${e}`);
+    }
+});
+
+
+// anmie menu 
+
+cmd({  
+    pattern: "animenu",  
+    desc: "menu the bot",  
+    category: "menu",  
+    react: "🧚",  
+    filename: __filename  
+},   
+async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {  
+    try {  
+        let dec = `╭━━〔 *Anime Menu* 〕━━┈⊷  
+┃◈╭─────────────·๏  
+┃◈┃😈 • fack  
+┃◈┃🐺 • awoo  
+┃◈┃👧 • garl  
+┃◈┃💖 • waifu  
+┃◈┃🐱 • neko  
+┃◈┃✨ • megnumin  
+┃◈┃😽 • neko  
+┃◈┃🧹 • maid  
+┃◈┃👶 • loli  
+┃◈┃👩‍🎤 • animegirl  
+┃◈┃👧 • animegirl1  
+┃◈┃👧 • animegirl2  
+┃◈┃👧 • animegirl3  
+┃◈┃👧 • animegirl4  
+┃◈┃👧 • animegirl5  
+┃◈┃🎌 • anime  
+┃◈┃🎌 • anime1  
+┃◈┃🎌 • anime1  
+┃◈┃🎌 • anime2  
+┃◈┃🎌 • anime3  
+┃◈┃🎌 • anime4  
+┃◈┃🎌 • anime5  
+┃◈└───────────┈⊷  
+╰──────────────┈⊷  
+> ${config.DESCRIPTION}`;  
+  
+        await conn.sendMessage(  
+            from,  
+            {  
+                image: { url: `https://files.catbox.moe/01rv4n.jpg` },  
+                caption: dec,  
+                contextInfo: {  
+                    mentionedJid: [m.sender],  
+                    forwardingScore: 999,  
+                    isForwarded: true,  
+                    forwardedNewsletterMessageInfo: {  
+                        newsletterJid: '120363420828095666@newsletter',  
+                        newsletterName: '𝗙𝗜𝗫𝗢 𝗫𝗠𝗗',  
+                        serverMessageId: 143  
+                    }  
+                }  
+            },  
+            { quoted: mek }  
+        );  
+  
+    } catch (e) {  
+        console.log(e);  
+        reply(`${e}`);  
+    }  
+});
+
+// ai menu 
+
+cmd({
+    pattern: "aimenu",
+    desc: "menu the bot",
+    category: "menu",
+    react: "🤖",
+    filename: __filename
+}, 
+async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
+    try {
+        let dec = `╭━━〔 *Ai Menu* 〕━━┈⊷
+┃◈╭─────────────·๏
+┃◈┃🧠 • ai
+┃◈┃💬 • chatgpt
+┃◈┃💭 • chatgpt2
+┃◈┃🤖 • bot
+┃◈┃🖼️ • aiimage1 
+┃◈┃🖼️ • aiimage2
+┃◈┃🖼️ • aiimage3
+┃◈┃🌌 • flux
+┃◈┃🎨 • sdiffusion
+┃◈┃🧬 • stability
+┃◈└───────────┈⊷
+╰──────────────┈⊷
+> ${config.DESCRIPTION}`;
+
+        await conn.sendMessage(
+            from,
+            {
+                image: { url: `https://files.catbox.moe/s5srbo.jpg` },
+                caption: dec,
+                contextInfo: {
+                    mentionedJid: [m.sender],
+                    forwardingScore: 999,
+                    isForwarded: true,
+                    forwardedNewsletterMessageInfo: {
+                        newsletterJid: '120363420828095666@newsletter',
+                        newsletterName: '𝗙𝗜𝗫𝗢 𝗫𝗠𝗗',
+                        serverMessageId: 143
+                    }
+                }
+            },
+            { quoted: mek }
+        );
+
+    } catch (e) {
+        console.log(e);
+        reply(`${e}`);
     }
 });
