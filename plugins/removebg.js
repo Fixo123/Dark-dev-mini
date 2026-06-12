@@ -12,11 +12,15 @@ cmd({
 },
 async(conn, mek, m, { from, quoted, reply }) => {
     try {
-        // පින්තූරයක් quote කර තිබේදැයි පරීක්ෂා කිරීම
-        const isQuotedImage = quoted && (quoted.mtype === 'imageMessage' || (quoted.mtype === 'extendedTextMessage' && quoted.contextInfo?.quotedMessage?.imageMessage));
+        // පින්තූරයක් යොමු කර තිබේදැයි පරීක්ෂා කිරීම (වඩාත් නිවැරදි ක්‍රමය)
+        const isQuotedImage = quoted && (
+            quoted.mtype === 'imageMessage' || 
+            (quoted.mtype === 'viewOnceMessage' && quoted.message.imageMessage) ||
+            (quoted.mtype === 'extendedTextMessage' && quoted.contextInfo?.quotedMessage?.imageMessage)
+        );
         
         if (!isQuotedImage) {
-            return await reply("❌ කරුණාකර පින්තූරයක් reply කර .removebg ලෙස ලබා දෙන්න.");
+            return await reply("❌ කරුණාකර පින්තූරයක් Reply කර .removebg ලෙස ලබා දෙන්න.");
         }
 
         const media = await conn.downloadAndSaveMediaMessage(quoted);
@@ -32,17 +36,15 @@ async(conn, mek, m, { from, quoted, reply }) => {
             responseType: 'arraybuffer'
         });
 
-        // පින්තූරය යැවීම
         await conn.sendMessage(from, { 
             image: Buffer.from(response.data), 
             caption: "*✅ Background Removed Successfully!*" 
         }, { quoted: mek });
 
-        // තාවකාලික ගොනුව මැකීම
         fs.unlinkSync(media);
 
     } catch (e) {
         console.log(e);
-        reply("Error: " + e.message);
+        reply("❌ Error: " + (e.response?.data?.error || e.message));
     }
 });
