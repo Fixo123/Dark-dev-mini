@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DARK DEV MINI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4ade80; /* Fresh Mint Green */
+            --secondary: #22c55e;
+            --bg: #f0fdf4; /* Very Light Green */
+            --glass: rgba(255, 255, 255, 0.9);
+            --text: #166534;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: radial-gradient(circle, #dcfce7 0%, #f0fdf4 100%);
+            font-family: 'Rajdhani', sans-serif;
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            padding: 3rem;
+            border-radius: 50px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            border: 2px solid #bbf7d0;
+            box-shadow: 0 20px 40px rgba(74, 222, 128, 0.2);
+            animation: fadeIn 1s ease-out;
+        }
+
+        /* Anime Mascot Style */
+        .mascot {
+            font-size: 60px;
+            margin-bottom: 15px;
+            display: inline-block;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0) rotate(-5deg); }
+            50% { transform: translateY(-15px) rotate(5deg); }
+        }
+
+        h1 {
+            color: var(--secondary);
+            font-family: 'Orbitron', sans-serif;
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+        }
+
+        input {
+            width: 100%;
+            border: 2px solid #86efac;
+            border-radius: 25px;
+            padding: 15px;
+            text-align: center;
+            font-size: 1.2rem;
+            outline: none;
+            transition: 0.3s;
+            margin-bottom: 20px;
+        }
+
+        input:focus { border-color: var(--primary); box-shadow: 0 0 10px rgba(74, 222, 128, 0.5); }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Glitter animation effect on button */
+        button:hover { transform: scale(1.02); filter: brightness(1.1); }
+
+        .code-display {
+            font-size: 2.2rem;
+            color: var(--secondary);
+            font-weight: bold;
+            margin-top: 20px;
+            padding: 10px;
+            border-bottom: 3px solid var(--primary);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.7; }
+            50% { opacity: 1; transform: scale(1.05); }
+            100% { opacity: 0.7; }
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Corner Decorations -->
+        <div class="corner tl"></div>
+        <div class="corner tr"></div>
+        <div class="corner bl"></div>
+        <div class="corner br"></div>
+
+        <h1>DARK DEV MINI</h1>
+        <div class="status-line">System Status: <span style="color:var(--primary)">ONLINE</span></div>
+<div class="mascot">(✿◠‿◠)</div>
+
+        <div class="input-group">
+            <input type="text" id="number" placeholder="ENTER TARGET NUMBER (e.g. 94...)" autocomplete="off">
+        </div>
+
+        <button onclick="getCode()">GENERATE CODE</button>
+
+        <div id="result"></div>
+
+        <footer>POWERED BY FIXO DEV</footer>
+    </div>
+
+    <script>
+        async function getCode() {
+            const numberInput = document.getElementById("number");
+            const resDiv = document.getElementById("result");
+            const num = numberInput.value.replace(/[^0-9]/g, '');
+
+            if (!num) {
+                playSound('error');
+                resDiv.innerHTML = "<span style='color:#ff0055; text-shadow:0 0 10px #ff0055'>[ERROR] INPUT REQUIRED</span>";
+                numberInput.style.borderColor = "#ff0055";
+                return;
+            }
+
+            // Reset styling
+            numberInput.style.borderColor = "#00f3ff";
+            resDiv.innerHTML = '<div class="loader"></div><span style="margin-top:10px; font-size:0.8rem; letter-spacing:2px">ESTABLISHING HANDSHAKE...</span>';
+
+            try {
+                const req = await fetch(`/code?number=${num}`);
+                const data = await req.json();
+
+                if (data.code) {
+                    resDiv.innerHTML = `
+                        <div style="font-size:0.8rem; color:#aaa">PAIRING CODE RECEIVED:</div>
+                        <div class="code-display" onclick="copyCode('${data.code}')">${data.code}</div>
+                    `;
+                    playSound('success');
+                } else if (data.status === 'already_connected') {
+                    resDiv.innerHTML = "<span style='color:#0f0; text-shadow:0 0 10px #0f0'>[SYSTEM] ALREADY LINKED</span>";
+                } else {
+                    resDiv.innerHTML = "<span style='color:#ff0055'>[ERROR] CONNECTION FAILED</span>";
+                }
+            } catch (e) {
+                resDiv.innerHTML = "<span style='color:#ff0055'>[CRITICAL] SERVER UNREACHABLE</span>";
+            }
+        }
+
+        function copyCode(code) {
+            navigator.clipboard.writeText(code);
+            const display = document.querySelector('.code-display');
+            const originalText = display.innerText;
+            
+            display.innerText = "COPIED";
+            display.style.borderColor = "#0f0";
+            display.style.color = "#0f0";
+            
+            setTimeout(() => {
+                display.innerText = originalText;
+                display.style.borderColor = "var(--secondary)";
+                display.style.color = "var(--secondary)";
+            }, 1500);
+        }
+
+        // Optional: Simple placeholder sound function
+        function playSound(type) {
+            // Sound effects logic could go here
+        }
+    </script>
+</body>
+    </html>
