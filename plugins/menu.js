@@ -1,7 +1,6 @@
 const { cmd, commands } = require('../inconnuboy');
 const { getUserConfigFromMongoDB } = require('../lib/database');
 const config = require('../config');
-const os = require('os');
 
 cmd({
     pattern: 'menu',
@@ -9,12 +8,15 @@ cmd({
     desc: 'Show all commands by category',
     category: 'general',
     react: '📋'
-}, async (conn, mek, m, { from, sender, isOwner, reply }) => {
+}, async (conn, mek, m, { from, sender, reply }) => {
     try {
         const number = sender.split('@')[0];
-        const userConfig = await getUserConfigFromMongoDB(number);
+        const userConfig = await getUserConfigFromMongoDB(number) || {};
 
-        // Group commands by category
+        // ON/OFF with cute icons
+        const statusIcon = (val) => val === 'true'? '💚 ON' : '💔 OFF';
+
+        // Group commands
         const categories = {};
         for (const cmd of commands) {
             if (cmd.dontAddCommandList) continue;
@@ -24,59 +26,73 @@ cmd({
         }
 
         const categoryEmojis = {
-            general: '🌐',
-            group: '👥',
-            settings: '⚙️',
-            owner: '👑',
-            tools: '🔧',
-            fun: '🎭',
-            media: '🎬',
-            misc: '📦'
+            general: '🌐', group: '👥', settings: '⚙️', owner: '👑',
+            tools: '🔧', fun: '🎭', media: '🎬', misc: '📦'
         };
 
+        // Uptime cute format
         const uptime = process.uptime();
-        const hours = Math.floor(uptime / 3600);
-        const minutes = Math.floor((uptime % 3600) / 60);
-        const seconds = Math.floor(uptime % 60);
+        const h = Math.floor(uptime / 3600);
+        const m = Math.floor((uptime % 3600) / 60);
+        const s = Math.floor(uptime % 60);
 
-        let menuText = `╭──────────────────────◇\n`;
-        menuText += `│  *🤖 DARK DEV MINI — MENU*\n`;
-        menuText += `│──────────────────────\n`;
-        menuText += `│ 👤 User: ${m.pushName || 'User'}\n`;
-        menuText += `│ ⚡ Prefix: [ ${config.PREFIX} ]\n`;
-        menuText += `│ 🕐 Uptime: ${hours}h ${minutes}m ${seconds}s\n`;
-        menuText += `│ 🔌 Mode: ${config.WORK_TYPE || 'public'}\n`;
-        menuText += `│──────────────────────\n`;
-        menuText += `│ ⚙️ Settings Status\n`;
-        menuText += `│ 👁️ Auto View: ${userConfig.AUTO_VIEW_STATUS === 'true' ? 'ON ✅' : 'OFF ❌'}\n`;
-        menuText += `│ 📵 Anti Call: ${userConfig.ANTI_CALL === 'true' ? 'ON ✅' : 'OFF ❌'}\n`;
-        menuText += `│ 🎙️ Auto Record: ${userConfig.AUTO_RECORDING === 'true' ? 'ON ✅' : 'OFF ❌'}\n`;
-        menuText += `│ ⌨️ Auto Typing: ${userConfig.AUTO_TYPING === 'true' ? 'ON ✅' : 'OFF ❌'}\n`;
-        menuText += `│ ✅ Auto Read: ${userConfig.READ_MESSAGE === 'true' ? 'ON ✅' : 'OFF ❌'}\n`;
-        menuText += `╰──────────────────────◇\n\n`;
+        // Cute Header
+        let menuText = `✨🦋 *DARK DEV MINI* 🦋✨\n`;
+        menuText += `╭─────────────╮\n`;
+        menuText += `│ 🌸 *Bot Menu* 🌸\n`;
+        menuText += `╰─────────────╯\n\n`;
+        menuText += `👋 Hi *${m.pushName || 'Cutie'}* ~!\n\n`;
+        menuText += `🎀 *Bot Info* 🎀\n`;
+        menuText += `⚡ Prefix : 「 ${config.PREFIX} 」\n`;
+        menuText += `⏰ Uptime : ${h}h ${m}m ${s}s\n`;
+        menuText += `🔌 Mode : ${config.WORK_TYPE?.toUpperCase() || 'PUBLIC'} ✨\n\n`;
 
-        // List commands per category
-        const catOrder = ['general', 'group', 'settings', 'owner', 'tools', 'fun', 'media', 'misc'];
-        const sortedCats = [...catOrder.filter(c => categories[c]), ...Object.keys(categories).filter(c => !catOrder.includes(c))];
+        // Settings with cute borders
+        menuText += `🎀 *Bot Settings* 🎀\n`;
+        menuText += `┌─ 💕 Auto Features ─\n`;
+        menuText += `│ 👁️ View Status : ${statusIcon(userConfig.AUTO_VIEW_STATUS)}\n`;
+        menuText += `│ 📵 Anti Call : ${statusIcon(userConfig.ANTI_CALL)}\n`;
+        menuText += `│ 🎙️ Auto Record : ${statusIcon(userConfig.AUTO_RECORDING)}\n`;
+        menuText += `│ ⌨️ Auto Typing : ${statusIcon(userConfig.AUTO_TYPING)}\n`;
+        menuText += `│ ✅ Auto Read : ${statusIcon(userConfig.READ_MESSAGE)}\n`;
+        menuText += `└───────────────\n\n`;
+
+        // Commands list cute style
+        const catOrder = ['general', 'group', 'settings', 'owner', 'tools', 'media', 'fun', 'misc'];
+        const sortedCats = [...catOrder.filter(c => categories[c]),...Object.keys(categories).filter(c =>!catOrder.includes(c))];
 
         for (const cat of sortedCats) {
-            if (!categories[cat] || !categories[cat].length) continue;
+            if (!categories[cat] ||!categories[cat].length) continue;
             const emoji = categoryEmojis[cat] || '📦';
-            menuText += `╭─── ${emoji} *${cat.toUpperCase()}* ───\n`;
-            for (const c of categories[cat]) {
-                menuText += `│ ${config.PREFIX}${c.pattern}${c.desc ? ' — ' + c.desc : ''}\n`;
-            }
-            menuText += `╰────────────────────◇\n\n`;
+
+            menuText += `🎀 ${emoji} *${cat.toUpperCase()}* 🎀\n`;
+            menuText += `╭──────────────\n`;
+
+            categories[cat].forEach((c, i) => {
+                const dot = i % 2 === 0? '🌷' : '🌸';
+                menuText += `│ ${dot} ${config.PREFIX}${c.pattern}`;
+                if (c.desc) menuText += `\n│ 💬 ${c.desc}`;
+                menuText += `\n`;
+            });
+            menuText += `╰──────────────\n\n`;
         }
 
-        menuText += `> *© Powered by FIXO DEV*`;
+        menuText += `💖 *Use:* ${config.PREFIX}command for help\n`;
+        menuText += `🌟 ${config.BOT_FOOTER} 🌟`;
 
         await conn.sendMessage(from, {
             image: { url: config.IMAGE_PATH },
-            caption: menuText
+            caption: menuText,
+            footer: '✨ Tap buttons below ✨',
+            buttons: [
+                { buttonId: `${config.PREFIX}ping`, buttonText: { displayText: '⚡ Ping Me' }, type: 1 },
+                { buttonId: `${config.PREFIX}alive`, buttonText: { displayText: '💫 Alive?' }, type: 1 }
+            ],
+            headerType: 4
         }, { quoted: mek });
 
     } catch (e) {
-        reply('*❌ Menu error: ' + e.message + '*');
+        console.log(e);
+        reply('❌ Menu error: ' + e.message);
     }
 });
