@@ -41,7 +41,7 @@ cmd({
         // CUTE LOVELY HEADER
         let menuText = `💖🦋 *${config.BOT_NAME}* 🦋💖\n`;
         menuText += `╭━━━━━━━✧━━━━━━━╮\n`;
-        menuText += ` 🌷 *Kawaii Command Menu* 🌷\n`;
+        menuText += ` 🌷 *ommand Menu* 🌷\n`;
         menuText += `╰━━━━━━━✧━━━━━━━╯\n\n`;
         menuText += `🎀 Hii cutie *${m.pushName || 'Bestie'}* ~! 🎀\n`;
         menuText += `Welcome to my magical world~ 💕\n\n`;
@@ -49,11 +49,11 @@ cmd({
         menuText += `🌸 *Bot Chan Info* 🌸\n`;
         menuText += `💌 Prefix : 「 ${config.PREFIX} 」\n`;
         menuText += `⏰ Online : ${h}h ${m}m ${s}s\n`;
-        menuText += `🔌 Mode : ${config.WORK_TYPE?.toUpperCase() || 'PUBLIC'} chan\n`;
-        menuText += `📦 Total Commands : ${commands.filter(c =>!c.dontAddCommandList).length} kawaii cmds\n`;
+        menuText += `🔌 Mode : ${config.WORK_TYPE?.toUpperCase() || 'PUBLIC'} \n`;
+        menuText += `📦 Total Commands : ${commands.filter(c =>!c.dontAddCommandList).length} cmds\n`;
 
         // CUTE SETTINGS BOX
-        menuText += `🌷 *Bot Chan Settings* 🌷\n`;
+        menuText += `🌷 *Bot Settings* 🌷\n`;
         menuText += `┏━━━━━━━━━━━━━━━┓\n`;
         menuText += `┃ 💕 *Auto Features* 💕 ┃\n`;
         menuText += `┣━━━━━━━━━━━━━━━┫\n`;
@@ -72,7 +72,7 @@ cmd({
             if (!categories[cat] ||!categories[cat].length) continue;
             const emoji = categoryEmojis[cat] || '🌈';
 
-            menuText += `🎀 ${emoji} *${cat.toUpperCase()} Chan* 🎀\n`;
+            menuText += `🎀 ${emoji} *${cat.toUpperCase()} * 🎀\n`;
             menuText += `◈━━━━━━━━━━━━━━━◈\n`;
 
             categories[cat].forEach((c, i) => {
@@ -138,7 +138,7 @@ cmd({
         info += `🏷️ *Name:* ${command.pattern} chan\n`;
         if (command.alias && command.alias.length > 0) info += `🔗 *Nicknames:* ${command.alias.join(', ')}\n`;
         info += `📂 *Category:* ${command.category || 'misc'} chan\n`;
-        info += `💬 *About:* ${command.desc || 'Kawaii command chan~'}\n`;
+        info += `💬 *About:* ${command.desc || ' command ~'}\n`;
         if (command.use) info += `📝 *How to use:* ${config.PREFIX}${command.use}\n`;
         if (command.react) info += `⚡ *Mood:* ${command.react}\n`;
         info += `╰━━━━━━━━━━━━━╯\n\n`;
