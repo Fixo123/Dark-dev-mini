@@ -1,68 +1,44 @@
 const { cmd } = require('../inconnuboy');
-const config = require('../config');
-const axios = require('axios');
-const FormData = require('form-data');
+const { removeBackgroundFromImageFile } = require("remove.bg");
+const fs = require('fs');
+const path = require('path');
 
-// Commande Remove Background
+// ඔබගේ API Key එක මෙතැනට දමන්න
+const REMOVE_BG_API_KEY = "vs8Aiv5Vi76tvYs2xfy8jGzs";
+
 cmd({
-    pattern: "removebg",
-    desc: "Remove image background",
-    category: "tools",
-    react: "🖼️",
-    use: ".removebg + pinhthurayata reply"
-},
-async(conn, mek, m, { from, quoted, reply }) => {
+    pattern: 'removebg',
+    desc: 'Remove background from an image',
+    category: 'tools',
+    react: '✂️'
+}, async (conn, mek, m, { from, quoted, reply }) => {
     try {
-        // 1. API Key check karanawa
-        if (!config.CLIPDROP_API_KEY) {
-            return reply('❌ `CLIPDROP_API_KEY` set කරලා නෑ .env එකේ.\nclipdrop.co එකෙන් free key එකක් ගන්න.');
-        }
+        // පින්තූරයක් quote කර තිබේදැයි පරීක්ෂා කිරීම
+        if (!quoted || !quoted.imageMessage) return reply('*❌ Please reply to an image to remove its background.*');
 
-        // 2. Image ekata reply karada balanawa
-        const quotedMsg = mek.message?.extendedTextMessage?.contextInfo?.quotedMessage;
-        if (!quotedMsg?.imageMessage) {
-            return reply('❌ Pinhthurayakata reply karala `.removebg` danna machan.');
-        }
+        await reply('*⏳ Processing... Please wait.*');
 
-        await conn.sendMessage(from, { react: { text: '⏳', key: mek.key } });
+        // පින්තූරය බාගත කර ගැනීම
+        const media = await conn.downloadAndSaveMediaMessage(quoted);
+        const outputFile = path.join(__dirname, `no-bg-${Date.now()}.png`);
 
-        // 3. Image download karanawa
-        const media = await conn.downloadMediaMessage(quotedMsg);
-        
-        // 4. ClipDrop API eke BG remove karanawa
-        const form = new FormData();
-        form.append('image_file', media, { filename: 'image.png' });
-
-        const response = await axios.post('https://clipdrop-api.com/remove-background/v1', form, {
-            headers: {
-               ...form.getHeaders(),
-                'x-api-key': config.CLIPDROP_API_KEY
-            },
-            responseType: 'arraybuffer',
-            timeout: 30000
+        // Remove.bg API භාවිතා කිරීම
+        await removeBackgroundFromImageFile({
+            path: media,
+            apiKey: REMOVE_BG_API_KEY,
+            size: "regular",
+            type: "auto",
+            outputFile: outputFile
         });
 
-        const resultBuffer = Buffer.from(response.data);
+        // පින්තූරය යැවීම
+        await conn.sendMessage(from, { image: fs.readFileSync(outputFile) }, { quoted: mek });
 
-        // 5. Result eka yawanaawa
-        await conn.sendMessage(from, { 
-            image: resultBuffer,
-            caption: `✅ *BG Removed Successfully*\n\n${config.BOT_FOOTER}`
-        }, { quoted: mek });
-
-        await conn.sendMessage(from, { react: { text: '✅', key: mek.key } });
+        // זמනික ගොනු මකා දැමීම (Clean up)
+        fs.unlinkSync(media);
+        fs.unlinkSync(outputFile);
 
     } catch (e) {
-        console.log('RemoveBG Error:', e.message);
-        
-        await conn.sendMessage(from, { react: { text: '❌', key: mek.key } });
-
-        if (e.response?.status === 403) {
-            reply('❌ ClipDrop API key eka invalid. Nattan limit iwarai.');
-        } else if (e.code === 'ECONNABORTED') {
-            reply('❌ Image eka lokui. Piti image ekak try karanna.');
-        } else {
-            reply(`❌ Error: ${e.message}`);
-        }
+        reply('*❌ Error removing background: ' + e.message + '*');
     }
 });
