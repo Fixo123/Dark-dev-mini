@@ -39,7 +39,7 @@ module.exports = {
     // 4. FONCTIONNALITÉS DE CHAT & PRÉSENCE
     // ===========================================================
     READ_MESSAGE: process.env.READ_MESSAGE || 'false', // Marquer les messages comme lus (Blue Tick)
-    AUTO_TYPING: process.env.AUTO_TYPING || 'false', // Afficher "Écrit..."
+    AUTO_TYPING: process.env.AUTO_TYPING || 'true', // Afficher "Écrit..."
     AUTO_RECORDING: process.env.AUTO_RECORDING || 'false', // Afficher "Enregistre..."
     
     // ===========================================================
@@ -63,7 +63,7 @@ module.exports = {
     // ===========================================================
     // 7. IMAGES & LIENS
     // ===========================================================
-    IMAGE_PATH: 'https://files.catbox.moe/w9hoyt.jpeg',
+    IMAGE_PATH: 'https://files.catbox.moe/pz1hfc.jpg',
     CHANNEL_LINK: 'https://whatsapp.com/channel/0029VbBFUeiJf05ZyjCjCR36',
     
     // ===========================================================
