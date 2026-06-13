@@ -21,7 +21,6 @@
     "node-telegram-bot-api": "^0.67.0",
     "fs-extra": "^11.3.5",
     "pino": "^10.3.1",
-    "pino-pretty": "^10.2.3",
     "@octokit/rest": "^22.0.1",
     "child_process": "^1.0.2",
     "denethdev-ytmp3": "1.0.3",
