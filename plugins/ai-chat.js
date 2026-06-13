@@ -13,7 +13,7 @@ const cleanContext = (sender) => ({
 cmd({
     pattern: "ai",
     desc: "Chat with an AI model",
-    category: "ai",
+    category: "tools",
     react: "🤖",
     filename: __filename
 }, async (conn, mek, m, { from, q, reply, react, sender }) => {
