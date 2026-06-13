@@ -1,39 +1,31 @@
 const { cmd } = require('../inconnuboy');
 
-// ── FAKE VOTE ──
 cmd({
     pattern: 'fakevote',
-    desc: 'Create a poll',
-    category: 'group',
-    react: '🗳️'
-}, async (conn, mek, m, { from, isGroup, isAdmins, args, reply }) => {
+    desc: 'Simulate fake votes for a poll (100-700)',
+    category: 'tools',
+    react: '📊'
+}, async (conn, mek, m, { args, reply }) => {
     try {
-        if (!isGroup) return reply('*❌ Group only command.*');
-        if (!isAdmins) return reply('*❌ Only admins can create polls.*');
+        const link = args[0];
+        if (!link) return reply('*❌ Please provide the poll message link!*');
 
-        const input = args.join(' ');
-        if (!input.includes('|')) return reply('*❌ Please use the format: !fakevote Topic | Option1 | Option2*');
+        // 100 සිට 700 දක්වා අහඹු අගයන් 3ක් උදාහරණයකට
+        const vote1 = Math.floor(Math.random() * (700 - 100 + 1)) + 100;
+        const vote2 = Math.floor(Math.random() * (700 - 100 + 1)) + 100;
+        const vote3 = Math.floor(Math.random() * (700 - 100 + 1)) + 100;
 
-        const parts = input.split('|').map(o => o.trim());
-        const pollName = parts[0];
-        const options = parts.slice(1);
+        const resultText = `
+*📊 Poll Fake Results Simulation*
 
-        if (options.length < 2) return reply('*❌ Please provide at least 2 options.*');
+*Option 1:* ${vote1} votes
+*Option 2:* ${vote2} votes
+*Option 3:* ${vote3} votes
 
-        // Poll එක යැවීම
-        await conn.sendMessage(from, {
-            poll: {
-                name: pollName,
-                values: options,
-                selectableCount: 1
-            }
-        }, { quoted: mek });
+*Total Simulated:* ${vote1 + vote2 + vote3} votes
+*Status:* Successfully generated fake data for link provided.`;
 
-        // Reaction එක යැවීම
-        await conn.sendMessage(from, { 
-            react: { text: '🗳️', key: mek.key } 
-        });
-
+        await reply(resultText);
     } catch (e) {
         reply('*❌ Error: ' + e.message + '*');
     }
