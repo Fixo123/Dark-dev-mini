@@ -32,7 +32,7 @@ async(conn, mek, m, { from, reply }) => {
     try {
         await conn.sendMessage(from, { 
             image: { url: config.IMAGE_PATH },
-            caption: `*FIXO DEV*\n\n> ${config.BOT_FOOTER}`
+            caption: `*DARK DEV MINI CONNECTED 🧚‍♂️*\n\n> ${config.BOT_FOOTER}`
         }, { quoted: mek });
     } catch (e) {
         reply("Error: " + e.message);
