@@ -25,7 +25,7 @@ cmd({
         const s = Math.floor(uptime % 60);
         
         await react("🔄");
-        reply(`*🔄 INCONNU BOY TECH - ANTI DISCONNECT*\n\n💖 Status: *Active* \n📊 Reconnect Count: ${reconnectCount}/${MAX_RECONNECT}\n⏰ Last Ping: ${Math.floor((Date.now() - lastPing)/1000)}s ago\n⏱️ Uptime: ${h}h ${m}m ${s}s\n✅ Bot eka disconnect unoth auto reconnect wenawa machan`);
+        reply(`*🔄 DARK DEV MINI - ANTI DISCONNECT*\n\n💖 Status: *Active* \n📊 Reconnect Count: ${reconnectCount}/${MAX_RECONNECT}\n⏰ Last Ping: ${Math.floor((Date.now() - lastPing)/1000)}s ago\n⏱️ Uptime: ${h}h ${m}m ${s}s\n✅ Bot eka disconnect unoth auto reconnect wenawa machan`);
     } catch (e) {
         reply("Error: " + e.message);
     }
