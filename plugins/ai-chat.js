@@ -1,50 +1,30 @@
 const { cmd } = require('../inconnuboy');
-const config = require('../config');
 const axios = require('axios');
 
-// AI Chat Command
+// ── AI CHAT COMMAND ──
 cmd({
-    pattern: "ai",
-    alias: ["bot", "chatgpt", "gpt"],
-    desc: "Chat with AI model",
-    category: "ai",
-    react: "🤖",
-    use: ".ai your message"
-},
-async(conn, mek, m, { from, q, reply, react }) => {
+    pattern: 'ai',
+    desc: 'Chat with ChatGPT',
+    category: 'ai',
+    react: '🤖'
+}, async (conn, mek, m, { from, args, reply }) => {
     try {
-        // Message eka nathnam
-        if (!q) {
-            return reply(`🤖 *AI Chat* 🤖\n\n❌ Message ekak danna machan\n💡 *Example:* ${config.PREFIX}ai ඔයා කවුද?`);
-        }
+        const query = args.join(' ');
+        if (!query) return reply('*❌ Please provide a question or message! Example: .ai Hello*');
 
-        // Processing react
-        await react("⏳");
+        await conn.sendMessage(from, { react: { text: '⏳', key: mek.key } });
 
-        // API call
-        const apiUrl = `https://apis-keith.vercel.app/ai/gpt?q=${encodeURIComponent(q)}`;
-        const { data } = await axios.get(apiUrl, { timeout: 30000 });
+        // API call eka
+        const apiUrl = `https://chatgpt-api.faizankhichi.me/?q=${encodeURIComponent(query)}`;
+        const response = await axios.get(apiUrl);
 
-        // Data check
-        if (!data || !data.status || !data.result) {
-            await react("❌");
-            return reply("❌ AI response ekak awa na. Thawa welawek try karanna.");
-        }
+        // API eken ena result eka hoyala ewanna
+        // (API eke structure eka anuwa meka wenas wenna puluwan)
+        const result = response.data.result || response.data.answer || response.data;
 
-        // Cute response format
-        const aiText = `🤖 *DARK DEV AI* 🤖\n\n💬 *You:* ${q}\n\n✨ *AI:* ${data.result}\n\n> ${config.BOT_FOOTER}`;
-
-        await reply(aiText);
-        await react("✅");
+        await reply(`*🤖 ChatGPT:* \n\n${result}`);
 
     } catch (e) {
-        console.error("AI Error:", e.message);
-        await react("❌");
-        
-        if (e.code === 'ECONNABORTED') {
-            reply("⏰ AI timeout una. Message eka koti karala balanna.");
-        } else {
-            reply("❌ AI ekata connect wenne na. API down athi.");
-        }
+        reply('*❌ Error connecting to AI service: ' + e.message + '*');
     }
 });
