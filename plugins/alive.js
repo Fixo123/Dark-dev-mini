@@ -106,7 +106,7 @@ ${config.BOT_FOOTER}`;
                 forwardingScore: 1000,
                 isForwarded: true,
                 forwardedNewsletterMessageInfo: {
-                    newsletterJid: '120363420828095666@newsletter',
+                    newsletterJid: '120363421796655176@newsletter',
                     newsletterName: '𝗙𝗜𝗫𝗢 𝗫𝗠𝗗',
                     serverMessageId: 143
                 }
