@@ -1,12 +1,12 @@
-const { cmd, commands } = require('../inconnuboy');
-const config = require('../config');
+const { cmd } = require('../inconnuboy');
 const os = require("os");
 const { runtime } = require('../lib/functions');
+const config = require('../config');
 const https = require("https");
 const { execSync } = require("child_process");
 const fs = require('fs');
 
-// Helper Functions
+// ── HELPER FUNCTIONS ──
 function detectHostingPlatform() {
     if (process.env.RAILWAY_STATIC_URL) return 'Railway';
     if (process.env.REPL_ID) return 'Replit';
@@ -58,14 +58,15 @@ function getPublicIP() {
     });
 }
 
-// Alive Command
+// ── ALIVE COMMAND ──
 cmd({
     pattern: "alive",
+    alias: ["status", "uptime", "a"],
     desc: "Check if the bot is online and active",
     category: "general",
-    react: "💫"
+    react: "⚡"
 },
-async(conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
+async (conn, mek, m, { from, sender, reply }) => {
     try {
         const hostPlatform = detectHostingPlatform();
         const distro = getLinuxDistro();
@@ -96,7 +97,7 @@ async(conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, send
 🐧 *OS:* ${distro}  
 🌐 *IP:* ${ip}
 __________________________________
-${config.BOT_FOOTER}`;
+${config.DESCRIPTION}`;
 
         await conn.sendMessage(from, {
             image: { url: "https://files.catbox.moe/on64af.png" },
@@ -107,14 +108,14 @@ ${config.BOT_FOOTER}`;
                 isForwarded: true,
                 forwardedNewsletterMessageInfo: {
                     newsletterJid: '120363421796655176@newsletter',
-                    newsletterName: '𝗙𝗜𝗫𝗢 𝗫𝗠𝗗',
+                    newsletterName: '𝗗𝗔𝗥𝗞 𝗗𝗘𝗩 𝗠𝗜𝗡𝗜',
                     serverMessageId: 143
                 }
             }
         }, { quoted: mek });
 
     } catch (e) {
-        console.log(e);
+        console.error("Alive Error:", e);
         reply(`❌ Error: ${e.message}`);
     }
 });
