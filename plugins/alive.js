@@ -1,4 +1,4 @@
-const { cmd } = require('../inconnuboy');
+const { cmd } = require('../command');
 const os = require("os");
 const { runtime } = require('../lib/functions');
 const config = require('../config');
@@ -6,7 +6,6 @@ const https = require("https");
 const { execSync } = require("child_process");
 const fs = require('fs');
 
-// ── HELPER FUNCTIONS ──
 function detectHostingPlatform() {
     if (process.env.RAILWAY_STATIC_URL) return 'Railway';
     if (process.env.REPL_ID) return 'Replit';
@@ -29,23 +28,33 @@ function getLinuxDistro() {
         const data = fs.readFileSync('/etc/os-release', 'utf-8');
         const nameLine = data.split('\n').find(line => line.startsWith('PRETTY_NAME='));
         return nameLine ? nameLine.split('=')[1].replace(/"/g, '') : 'Unknown Linux';
-    } catch { return 'Unknown OS'; }
+    } catch {
+        return 'Unknown OS';
+    }
 }
 
 function getCPUUsage() {
     const cpus = os.cpus();
     let idle = 0, total = 0;
+
     cpus.forEach(core => {
-        for (let type in core.times) total += core.times[type];
+        for (let type in core.times) {
+            total += core.times[type];
+        }
         idle += core.times.idle;
     });
-    return `${100 - Math.round((idle / total) * 100)}%`;
+
+    const usage = 100 - Math.round((idle / total) * 100);
+    return `${usage}%`;
 }
 
 function getDiskUsage() {
     try {
-        return execSync("df -h / | awk 'NR==2 {print $3\" / \"$2}'").toString().trim() || 'Unavailable';
-    } catch { return 'Unavailable'; }
+        const output = execSync("df -h / | awk 'NR==2 {print $3\" / \"$2}'").toString().trim();
+        return output || 'Unavailable';
+    } catch {
+        return 'Unavailable';
+    }
 }
 
 function getPublicIP() {
@@ -58,13 +67,13 @@ function getPublicIP() {
     });
 }
 
-// ── ALIVE COMMAND ──
 cmd({
     pattern: "alive",
     alias: ["status", "uptime", "a"],
     desc: "Check if the bot is online and active",
-    category: "general",
-    react: "⚡"
+    category: "main",
+    react: "⚡",
+    filename: __filename
 },
 async (conn, mek, m, { from, sender, reply }) => {
     try {
@@ -79,7 +88,7 @@ async (conn, mek, m, { from, sender, reply }) => {
         const cpuUsage = getCPUUsage();
         const diskUsage = getDiskUsage();
 
-        const status = `*📡 DARK DEV MINI*
+        const status = `*📡 FIXO XMD*
 
 ✅ *Status:* Active  
 👑 *Owner:* ${config.OWNER_NAME}  
@@ -103,12 +112,12 @@ ${config.DESCRIPTION}`;
             image: { url: "https://files.catbox.moe/on64af.png" },
             caption: status,
             contextInfo: {
-                mentionedJid: [sender],
+                mentionedJid: [m.sender],
                 forwardingScore: 1000,
                 isForwarded: true,
                 forwardedNewsletterMessageInfo: {
-                    newsletterJid: '120363421796655176@newsletter',
-                    newsletterName: '𝗗𝗔𝗥𝗞 𝗗𝗘𝗩 𝗠𝗜𝗡𝗜',
+                    newsletterJid: '120363420828095666@newsletter',
+                    newsletterName: '𝗙𝗜𝗫𝗢 𝗫𝗠𝗗',
                     serverMessageId: 143
                 }
             }
