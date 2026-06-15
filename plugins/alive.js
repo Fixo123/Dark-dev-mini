@@ -26,15 +26,25 @@ cmd({
     pattern: "alive",
     desc: "Check if bot is alive",
     category: "general",
-    react: "💫"
+    react: "💖"
 },
 async(conn, mek, m, { from, reply }) => {
     try {
+        const cuteImage = "https://files.catbox.moe/x94c6h.jpg"; // Cute heart/couple image
+        
+        const cuteCaption = `💖 *Hey, I'm right here for you...* 💖\n\n` +
+                           `🌸 Dark Dev Mini bot is alive & happy ✨\n` +
+                           `🥰 Just waiting for your message with a smile\n` +
+                           `💫 Type any command... I'm all yours!\n\n` +
+                           `> ${config.BOT_FOOTER}\n` +
+                           `> Always by your side 💕`;
+
         await conn.sendMessage(from, { 
-            image: { url: config.IMAGE_PATH },
-            caption: `*DARK DEV MINI CONNECTED🧚‍♂️*\n\n> ${config.BOT_FOOTER}`
+            image: { url: cuteImage },
+            caption: cuteCaption
         }, { quoted: mek });
+        
     } catch (e) {
-        reply("Error: " + e.message);
+        reply("Oops! Error: " + e.message);
     }
 });
