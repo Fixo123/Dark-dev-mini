@@ -1,44 +1,51 @@
+const { downloadContentFromMessage } = require('@whiskeysockets/baileys');
+const FormData = require('form-data');
+const axios = require('axios');
 const { cmd } = require('../inconnuboy');
-const { removeBackgroundFromImageFile } = require("remove.bg");
-const fs = require('fs');
-const path = require('path');
 
-// ඔබගේ API Key එක මෙතැනට දමන්න
-const REMOVE_BG_API_KEY = "vs8Aiv5Vi76tvYs2xfy8jGzs";
-
+// ── REMOVE BACKGROUND ──
 cmd({
     pattern: 'removebg',
-    desc: 'Remove background from an image',
+    alias: ['rbg'],
+    desc: 'Remove background from image',
     category: 'tools',
-    react: '✂️'
+    react: '🖼️'
 }, async (conn, mek, m, { from, quoted, reply }) => {
     try {
-        // පින්තූරයක් quote කර තිබේදැයි පරීක්ෂා කිරීම
-        if (!quoted || !quoted.imageMessage) return reply('*❌ Please reply to an image to remove its background.*');
+        // පින්තූරයක් හෝ reply කර ඇති පින්තූරයක් තිබේදැයි පරීක්ෂා කිරීම
+        const isQuotedImage = quoted && (quoted.imageMessage || quoted.viewOnceMessageV2?.message?.imageMessage);
+        if (!isQuotedImage) return reply('*❌ Please reply to an image.*');
 
-        await reply('*⏳ Processing... Please wait.*');
+        await reply('*⏳ Removing background, please wait...*');
 
-        // පින්තූරය බාගත කර ගැනීම
-        const media = await conn.downloadAndSaveMediaMessage(quoted);
-        const outputFile = path.join(__dirname, `no-bg-${Date.now()}.png`);
+        // පින්තූරය download කරගැනීම
+        const media = await downloadContentFromMessage(quoted.imageMessage || quoted.viewOnceMessageV2.message.imageMessage, 'image');
+        let buffer = Buffer.from([]);
+        for await (const chunk of media) {
+            buffer = Buffer.concat([buffer, chunk]);
+        }
 
-        // Remove.bg API භාවිතා කිරීම
-        await removeBackgroundFromImageFile({
-            path: media,
-            apiKey: REMOVE_BG_API_KEY,
-            size: "regular",
-            type: "auto",
-            outputFile: outputFile
+        // Remove.bg API වෙත යැවීම
+        const formData = new FormData();
+        formData.append('size', 'auto');
+        formData.append('image_file', buffer, 'file.jpg');
+
+        const response = await axios.post('https://api.remove.bg/v1.0/removebg', formData, {
+            headers: {
+                ...formData.getHeaders(),
+                'X-Api-Key': 'JABqCMojeFq6wcis5Z3714V3' // ඔබ ලබා දුන් API Key එක
+            },
+            responseType: 'arraybuffer'
         });
 
-        // පින්තූරය යැවීම
-        await conn.sendMessage(from, { image: fs.readFileSync(outputFile) }, { quoted: mek });
-
-        // זמනික ගොනු මකා දැමීම (Clean up)
-        fs.unlinkSync(media);
-        fs.unlinkSync(outputFile);
+        // Background ඉවත් කළ පින්තූරය යැවීම
+        await conn.sendMessage(from, { 
+            image: Buffer.from(response.data), 
+            caption: '*✅ Background removed successfully!*' 
+        }, { quoted: mek });
 
     } catch (e) {
-        reply('*❌ Error removing background: ' + e.message + '*');
+        console.error(e);
+        reply('*❌ Error: ' + (e.response?.data?.errors?.[0]?.title || e.message) + '*');
     }
 });
