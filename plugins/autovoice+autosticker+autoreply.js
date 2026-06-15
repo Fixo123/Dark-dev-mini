@@ -17,6 +17,7 @@ cmd({
         const isEnabled = (dbVal, configVal) => dbVal === 'true' || dbVal === true || configVal === 'true' || configVal === true;
 
         const textInput = body.toLowerCase().trim();
+        let matchedAnyTrigger = false; // Trigger එකක් මැච් වුණාද නැද්ද බලන්න variable එකක්
 
         // 🎙️ 1. AUTO VOICE
         if (isEnabled(userConfig.AUTO_RECORDING, config.AUTO_VOICE)) {
@@ -24,8 +25,9 @@ cmd({
             if (fs.existsSync(voicePath)) {
                 const voiceData = JSON.parse(fs.readFileSync(voicePath, 'utf8'));
                 if (voiceData[textInput]) {
+                    matchedAnyTrigger = true;
                     await conn.sendPresenceUpdate('recording', from);
-                    return await conn.sendMessage(from, { 
+                    await conn.sendMessage(from, { 
                         audio: { url: voiceData[textInput] }, 
                         mimetype: 'audio/mpeg', 
                         mp3: true 
@@ -40,7 +42,8 @@ cmd({
             if (fs.existsSync(stickerPath)) {
                 const stickerData = JSON.parse(fs.readFileSync(stickerPath, 'utf8'));
                 if (stickerData[textInput]) {
-                    return await conn.sendMessage(from, { 
+                    matchedAnyTrigger = true;
+                    await conn.sendMessage(from, { 
                         sticker: { url: stickerData[textInput] }, 
                         package: '🌸 TOHID_MD ~ Cute Edition 🌸' 
                     }, { quoted: mek });
@@ -54,13 +57,14 @@ cmd({
             if (fs.existsSync(replyPath)) {
                 const replyData = JSON.parse(fs.readFileSync(replyPath, 'utf8'));
                 if (replyData[textInput]) {
-                    return await m.reply(replyData[textInput]);
+                    matchedAnyTrigger = true;
+                    await m.reply(replyData[textInput]);
                 }
             }
         }
 
-        // ⚡ 4. FAKE RECORDING (If no specific voice trigger matched)
-        if (isEnabled(userConfig.AUTO_RECORDING, config.FAKE_RECORDING)) {
+        // ⚡ 4. FAKE RECORDING (වැඩ කරන්නේ කිසිම JSON Trigger එකක් මැච් නොවුණොත් විතරයි)
+        if (!matchedAnyTrigger && isEnabled(userConfig.AUTO_RECORDING, config.FAKE_RECORDING)) {
             await conn.sendPresenceUpdate('recording', from);
         }
 
