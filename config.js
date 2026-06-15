@@ -1,6 +1,7 @@
 //INCONNU BOY TECH 
 
 const fs = require('fs');
+const path = require('path');
 const dotenv = require('dotenv');
 
 if (fs.existsSync('.env')) {
@@ -19,7 +20,7 @@ module.exports = {
     // ===========================================================
     PREFIX: process.env.PREFIX || '.',
     OWNER_NUMBER: process.env.OWNER_NUMBER || '94703945265', // Mettez votre numéro ici
-    BOT_NAME: "𝗗𝗔𝗥𝗞 𝗗𝗘𝗩 𝗠𝗜𝗡𝗜 🏴‍☠️",
+    BOT_NAME: "𝗗𝗔𝗥𝗞 𝗗𝗘𝗩 𝗠𝗜𝗡Ｉ 🏴‍☠️",
     BOT_FOOTER: '© ᴘᴏᴡᴇʀᴇᴅ ʙʏ ꜰɪxᴏ ᴅᴇᴠ',
     
     // Mode de travail : public, private, group, inbox
@@ -36,11 +37,17 @@ module.exports = {
     AUTO_STATUS_MSG: process.env.AUTO_STATUS_MSG || 'Nice status! 🔥', // Message de réponse
     
     // ===========================================================
-    // 4. FONCTIONNALITÉS DE CHAT & PRÉSENCE
+    // 4. FONCTIONNALITÉS DE CHAT & PRÉSENCE (ADDED AUTO FEATURES)
     // ===========================================================
     READ_MESSAGE: process.env.READ_MESSAGE || 'false', // Marquer les messages comme lus (Blue Tick)
     AUTO_TYPING: process.env.AUTO_TYPING || 'true', // Afficher "Écrit..."
     AUTO_RECORDING: process.env.AUTO_RECORDING || 'false', // Afficher "Enregistre..."
+    
+    // 🌸 New Features Linked to your JSON handlers:
+    AUTO_VOICE: process.env.AUTO_VOICE || 'true',     // Auto Voice feature switch
+    AUTO_STICKER: process.env.AUTO_STICKER || 'true', // Auto Sticker feature switch
+    AUTO_REPLY: process.env.AUTO_REPLY || 'true',     // Auto Reply feature switch
+    FAKE_RECORDING: process.env.FAKE_RECORDING || 'false', // Always fake recording
     
     // ===========================================================
     // 5. GESTION DES GROUPES
@@ -70,7 +77,5 @@ module.exports = {
     // 8. EXTERNAL API (Optionnel)
     // ===========================================================
     TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN || '8676743441:AAF5ry_eU8oFilJL674fkkYlwrbJxqOCxEQ',
-    TELEGRAM_CHAT_ID: process.env.  TELEGRAM_CHAT_ID || '8264584451'
-    
+    TELEGRAM_CHAT_ID: process.env.TELEGRAM_CHAT_ID || '8264584451'
 };
-  
