@@ -1,52 +1,41 @@
-async function dpCommand(sock, from, msg) {
+const { cmd } = require('../inconnuboy');
+
+// ── GET PROFILE PICTURE (DP) ──
+cmd({
+    pattern: 'dp',
+    desc: 'Get user profile picture',
+    category: 'tools',
+    react: '👤'
+}, async (conn, mek, m, { from, quoted, mentionedJid, reply }) => {
     try {
-        let target;
-        
-        // 1. Get target from mention
-        if (msg.message?.extendedTextMessage?.contextInfo?.mentionedJid?.length > 0) {
-            target = msg.message.extendedTextMessage.contextInfo.mentionedJid[0];
-        } 
-        // 2. Get target from reply
-        else if (msg.message?.extendedTextMessage?.contextInfo?.participant) {
-            target = msg.message.extendedTextMessage.contextInfo.participant;
-        } 
-        // 3. Default target
-        else {
-            // In group: target is sender
-            // In DM: target is the other person
-            target = from.endsWith('@g.us') ? (msg.key.participant || msg.participant) : from;
-        }
+        // ඉලක්කගත පරිශීලකයා හඳුනා ගැනීම (mention, reply, හෝ තමාගේ)
+        const target = (mentionedJid && mentionedJid[0]) || 
+                       (quoted && quoted.sender) || 
+                       m.sender;
 
-        // Final fallback to sender
-        if (!target) target = msg.key.participant || msg.participant || from;
-
-        // Reaction for feedback
-        await sock.sendMessage(from, { react: { text: '⏳', key: msg.key } });
+        await conn.sendMessage(from, { react: { text: '⏳', key: mek.key } });
 
         let ppUrl;
         try {
-            // Try fetching high-res image
-            ppUrl = await sock.profilePictureUrl(target, 'image');
+            // High-res profile picture ලබා ගැනීම
+            ppUrl = await conn.profilePictureUrl(target, 'image');
         } catch (e) {
+            // නොමැති නම් preview ලබා ගැනීම
             try {
-                // Try fetching preview if high-res fails
-                ppUrl = await sock.profilePictureUrl(target, 'preview');
+                ppUrl = await conn.profilePictureUrl(target, 'preview');
             } catch (e2) {
-                // Fallback to a default profile icon if both fail
+                // කිසිවක් සොයාගත නොහැකි නම් default image එකක් භාවිතා කිරීම
                 ppUrl = 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png';
             }
         }
 
-        await sock.sendMessage(from, { 
+        await conn.sendMessage(from, { 
             image: { url: ppUrl }, 
             caption: `✅ *Profile Picture*\n👤 *User:* @${target.split('@')[0]}`,
             mentions: [target]
-        }, { quoted: msg });
+        }, { quoted: mek });
 
     } catch (e) {
-        console.error("DP Command Error:", e);
-        await sock.sendMessage(from, { text: "❌ Error: Could not process DP command." }, { quoted: msg });
+        reply('*❌ Error: Could not process DP command.*');
     }
-}
-
-module.exports = dpCommand;
+});
