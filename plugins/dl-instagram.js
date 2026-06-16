@@ -55,7 +55,7 @@ cmd({
             if (isReplyToBot) {
                 if (receivedText === "1") {
                     await conn.sendMessage(from, { react: { text: '🎥', key: receivedMsg.key } });
-                    await conn.sendMessage(from, { video: { url: media.url }, caption: "*ᴀᴋɪɴᴅᴜ-ᴍᴅ*" }, { quoted: receivedMsg });
+                    await conn.sendMessage(from, { video: { url: media.url }, caption: "*ᴅᴀʀᴋ ᴅᴇᴠ ᴍɪɴɪ*" }, { quoted: receivedMsg });
                     conn.ev.off("messages.upsert", handler);
                 } else if (receivedText === "2") {
                     await conn.sendMessage(from, { react: { text: '🎶', key: receivedMsg.key } });
