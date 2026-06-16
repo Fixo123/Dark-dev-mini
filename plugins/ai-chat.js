@@ -1,7 +1,7 @@
 const { cmd } = require('../inconnuboy');
 const axios = require('axios');
 
-const API_BASE = "https://ai-proxy-server-smoky.vercel.app/";
+const API_BASE = "https://ai-proxy-server-smoky.vercel.app";
 
 // ── GEMINI AI ──
 cmd({
@@ -15,14 +15,25 @@ cmd({
 
         await conn.sendPresenceUpdate('composing', from);
 
-        const payload = { query: q };
-        const res = await axios.post(`${API_BASE}/gemini`, payload);
+        // API ඉල්ලීම සිදු කිරීම
+        const res = await axios.post(`${API_BASE}/gemini`, { query: q });
 
-        const answer = res.data.answer || '*❌ No response received from Gemini.*';
+        // ප්‍රතිචාරය පරීක්ෂා කිරීම
+        if (res.data && res.data.answer) {
+            await conn.sendMessage(from, { text: res.data.answer }, { quoted: mek });
+        } else {
+            reply('*❌ Gemini did not return a valid response.*');
+        }
         
-        await conn.sendMessage(from, { text: answer }, { quoted: mek });
     } catch (e) {
+        // Error එක පෙන්වීම
         console.error("Gemini Error:", e.message);
-        reply('*❌ Failed to fetch response from Gemini.*');
+        
+        let errorMessage = '*❌ Failed to fetch response from Gemini.*';
+        if (e.response) {
+            errorMessage += `\n*Status:* ${e.response.status}`;
+        }
+        
+        reply(errorMessage);
     }
 });
