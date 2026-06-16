@@ -1,94 +1,91 @@
-const { cmd } = require('../inconnuboy'); // ඔබේ කෝඩ් එකේ ඇති පරිදි නිවැරදි Path එක දෙන්න
-const yts = require('yt-search');
-const axios = require('axios');
+const { cmd } = require('../inconnuboy');
+const { ytmp3, ytmp4, tiktok } = require("sadaslk-dlcore");
+const yts = require("yt-search");
 
-// --- SONG COMMAND ---
+async function getYoutube(query) {
+    const isUrl = /(youtube\.com|youtu\.be)/i.test(query);
+    if (isUrl) {
+        const id = query.split("v=")[1] || query.split("/").pop();
+        const info = await yts({ videoId: id });
+        return info;
+    }
+    const search = await yts(query);
+    if (!search.videos.length) return null;
+    return search.videos[0];
+}
+
+// ── YTMP3 ──
 cmd({
-    pattern: 'song',
-    desc: 'Download YouTube MP3',
+    pattern: 'ytmp3',
+    alias: ['yta', 'song'],
+    desc: 'Download YouTube MP3 by name or link',
     category: 'download',
     react: '🎵'
-}, async (conn, mek, m, { from, q, reply, sender }) => {
+}, async (bot, mek, m, { from, q, reply }) => {
     try {
-        if (!q) return reply("⚠️ *Please provide a song name.*");
+        if (!q) return reply("*❌ Please provide a song name or link.*");
+        reply("*🔎 Searching...*");
+        const video = await getYoutube(q);
+        if (!video) return reply("*❌ No results found.*");
 
-        const search = await yts(q);
-        if (!search.videos.length) return reply("❌ *No results found.*");
+        const caption = `🎵 *${video.title}*\n\n👤 Channel: ${video.author.name}\n⏱ Duration: ${video.timestamp}\n👀 Views: ${video.views.toLocaleString()}\n🔗 ${video.url}`;
+        await bot.sendMessage(from, { image: { url: video.thumbnail }, caption }, { quoted: mek });
+        
+        reply("*⬇️ Downloading MP3...*");
+        const data = await ytmp3(video.url);
+        if (!data?.url) return reply("*❌ Failed to download MP3.*");
 
-        const data = search.videos[0];
-        const api = `https://ominisave.vercel.app/api/ytmp3_v3?url=${encodeURIComponent(data.url)}`;
-        const { data: apiRes } = await axios.get(api);
-
-        if (!apiRes?.status || !apiRes.result?.downloadUrl) return reply("❌ *Download failed.*");
-
-        const caption = `*「 ᴅᴀʀᴋ ᴅᴇᴠ ᴍɪɴɪ: ᴍᴜsɪᴄ ᴄᴏʀᴇ 」*\n\n🎵 *Title:* ${data.title}\n⏱️ *Dur:* ${data.timestamp}\n\n*Select Format:*\n01 ‣ Audio\n02 ‣ Document\n03 ‣ Voice Note`;
-
-        const sentMsg = await conn.sendMessage(from, { image: { url: data.thumbnail }, caption }, { quoted: mek });
-
-        const handler = async (msgData) => {
-            const receivedMsg = msgData.messages[0];
-            if (!receivedMsg?.message) return;
-            const text = (receivedMsg.message.conversation || receivedMsg.message.extendedTextMessage?.text || "").trim();
-            if (receivedMsg.message.extendedTextMessage?.contextInfo?.stanzaId !== sentMsg.key.id) return;
-
-            if (["1", "01", "2", "02", "3", "03"].includes(text)) {
-                await conn.sendMessage(from, { react: { text: '📥', key: receivedMsg.key } });
-                const url = apiRes.result.downloadUrl;
-                if (text === "1" || text === "01") {
-                    await conn.sendMessage(from, { audio: { url }, mimetype: "audio/mpeg" }, { quoted: receivedMsg });
-                } else if (text === "2" || text === "02") {
-                    await conn.sendMessage(from, { document: { url }, mimetype: "audio/mpeg", fileName: `${data.title}.mp3` }, { quoted: receivedMsg });
-                } else {
-                    await conn.sendMessage(from, { audio: { url }, mimetype: "audio/mpeg", ptt: true }, { quoted: receivedMsg });
-                }
-                conn.ev.off("messages.upsert", handler);
-            }
-        };
-
-        conn.ev.on("messages.upsert", handler);
-        setTimeout(() => conn.ev.off("messages.upsert", handler), 300000);
-    } catch (e) { reply('*❌ Error: ' + e.message + '*'); }
+        await bot.sendMessage(from, { audio: { url: data.url }, mimetype: "audio/mpeg" }, { quoted: mek });
+    } catch (e) {
+        reply('*❌ Error: ' + e.message + '*');
+    }
 });
 
-// --- VIDEO COMMAND ---
+// ── YTMP4 ──
 cmd({
-    pattern: 'video',
-    desc: 'Download YouTube MP4',
+    pattern: 'ytmp4',
+    alias: ['ytv', 'video'],
+    desc: 'Download YouTube MP4 by name or link',
     category: 'download',
     react: '🎬'
-}, async (conn, mek, m, { from, q, reply }) => {
+}, async (bot, mek, m, { from, q, reply }) => {
     try {
-        if (!q) return reply("⚠️ *Please provide a video name.*");
+        if (!q) return reply("*❌ Please provide a video name or link.*");
+        reply("*🔎 Searching...*");
+        const video = await getYoutube(q);
+        if (!video) return reply("*❌ No results found.*");
 
-        const search = await yts(q);
-        if (!search.videos.length) return reply("❌ *No results found.*");
+        const caption = `🎬 *${video.title}*\n\n👤 Channel: ${video.author.name}\n⏱ Duration: ${video.timestamp}\n👀 Views: ${video.views.toLocaleString()}\n🔗 ${video.url}`;
+        await bot.sendMessage(from, { image: { url: video.thumbnail }, caption }, { quoted: mek });
 
-        const data = search.videos[0];
-        const caption = `*「 ᴅᴀʀᴋ ᴅᴇᴠ ᴍɪɴɪ : ᴠɪᴅᴇᴏ ᴄᴏʀᴇ 」*\n\n🎬 *Title:* ${data.title}\n\n*Select Protocol:*\n01 ‣ 360p\n02 ‣ 720p\n03 ‣ 360p (Doc)\n04 ‣ 720p (Doc)`;
+        reply("*⬇️ Downloading video...*");
+        const data = await ytmp4(video.url, { format: "mp4", videoQuality: "720" });
+        if (!data?.url) return reply("*❌ Failed to download video.*");
 
-        const sentMsg = await conn.sendMessage(from, { image: { url: data.thumbnail }, caption }, { quoted: mek });
+        await bot.sendMessage(from, { video: { url: data.url }, mimetype: "video/mp4", fileName: data.filename || "video.mp4", caption: "🎬 YouTube video" }, { quoted: mek });
+    } catch (e) {
+        reply('*❌ Error: ' + e.message + '*');
+    }
+});
 
-        const handler = async (msgData) => {
-            const receivedMsg = msgData.messages[0];
-            if (!receivedMsg?.message) return;
-            const text = (receivedMsg.message.conversation || receivedMsg.message.extendedTextMessage?.text || "").trim();
-            if (receivedMsg.message.extendedTextMessage?.contextInfo?.stanzaId !== sentMsg.key.id) return;
+// ── TIKTOK ──
+cmd({
+    pattern: 'tiktok',
+    alias: ['tt'],
+    desc: 'Download TikTok video',
+    category: 'download',
+    react: '📱'
+}, async (bot, mek, m, { from, q, reply }) => {
+    try {
+        if (!q) return reply("*❌ Please provide a TikTok link.*");
+        reply("*⬇️ Downloading TikTok video...*");
 
-            let quality = (text === "2" || text === "02" || text === "4" || text === "04") ? "720p" : "360p";
-            let isDoc = (text === "3" || text === "03" || text === "4" || text === "04");
+        const data = await tiktok(q);
+        if (!data?.no_watermark) return reply("*❌ Failed to download TikTok video.*");
 
-            await conn.sendMessage(from, { react: { text: '⏳', key: receivedMsg.key } });
-            const api = `https://ominisave.vercel.app/api/ytmp4_v2?url=${encodeURIComponent(data.url)}&quality=${quality}`;
-            const { data: apiRes } = await axios.get(api);
-
-            if (apiRes?.status && apiRes.result?.downloadUrl) {
-                const media = isDoc ? { document: { url: apiRes.result.downloadUrl }, fileName: `${data.title}.mp4`, mimetype: "video/mp4" } : { video: { url: apiRes.result.downloadUrl } };
-                await conn.sendMessage(from, media, { quoted: receivedMsg });
-                conn.ev.off("messages.upsert", handler);
-            }
-        };
-
-        conn.ev.on("messages.upsert", handler);
-        setTimeout(() => conn.ev.off("messages.upsert", handler), 300000);
-    } catch (e) { reply('*❌ Error: ' + e.message + '*'); }
+        const caption = `🎵 *${data.title || "TikTok Video"}*\n\n👤 Author: ${data.author || "Unknown"}\n⏱ Duration: ${data.runtime}s`;
+        await bot.sendMessage(from, { video: { url: data.no_watermark }, caption }, { quoted: mek });
+    } catch (e) {
+        reply('*❌ Error: ' + e.message + '*');
+    }
 });
