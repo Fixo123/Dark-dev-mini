@@ -13,7 +13,7 @@ module.exports = {
     // 1. CONFIGURATION DE BASE (Session & Database)
     // ===========================================================
     SESSION_ID: process.env.SESSION_ID || "MINI BOT", 
-    MONGODB_URI: process.env.MONGODB_URI || 'mongodb://mongo:bnRKeXOAQGYmHmWooWsOBdfKnZnBgRYE@thomas.proxy.rlwy.net:18651',
+    MONGODB_URI: process.env.MONGODB_URI || 'mongodb://mongo:SWsLogKuNvlyWwSuhmGIlcHduZwTtVTj@switchyard.proxy.rlwy.net:43190',
     
     // ===========================================================
     // 2. INFORMATIONS DU BOT
