@@ -23,13 +23,13 @@ cmd({
 
         const media = response.data.BK9;
         
-        const desc = `*FIXO-XMD*
+        const desc = `*DARK DEV MINI*
 
 *PINS DOWNLOADER*
 ╭━━❐━⪼
 ┇๏ *Owner* - ${response.data.owner}
 ╰━━❑━⪼
-> *© Pᴏᴡᴇʀᴇᴅ Bʏ 𝐅ɪxᴏ 𝐗ᴍᴅ ♡*`;
+> *© Pᴏᴡᴇʀᴇᴅ Bʏ 𝐅ɪxᴏ 𝐃ᴇᴠ ♡*`;
 
         if (media && media.length > 0) {
             const videoUrl = media.find(item => item.url.includes('.mp4'))?.url;
