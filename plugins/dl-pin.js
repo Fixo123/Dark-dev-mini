@@ -1,42 +1,51 @@
 const { cmd } = require('../inconnuboy');
-const axios = require("axios");
-const cheerio = require("cheerio");
+const axios = require('axios');
 
+// ── PINTEREST DOWNLOADER ──
 cmd({
     pattern: 'pinterest',
-    react: '📌',
-    desc: 'Download images or videos from Pinterest',
+    alias: ['pin', 'pins', 'pindownload'],
+    desc: 'Download media from Pinterest',
     category: 'download',
-    filename: __filename
-}, async (conn, mek, m, { from, q, reply }) => {
+    react: '📌'
+}, async (conn, mek, m, { args, from, reply }) => {
     try {
-        if (!q) return reply('*❌ Please provide a Pinterest link.*');
+        if (!args[0]) return reply('*❌ Please provide a Pinterest URL.*');
 
-        await conn.sendMessage(from, { react: { text: '⏳', key: mek.key } });
-
-        // Pinterest වෙතින් දත්ත ලබා ගැනීම
-        const { data } = await axios.get(`https://pinterestdownloader.com/api/v2/pinterest-downloader?url=${encodeURIComponent(q)}`);
+        const pinterestUrl = args[0];
         
-        if (!data || !data.data) {
-            return reply('*❌ Failed to fetch media from this link.*');
+        // API ඇමතුම
+        const response = await axios.get(`https://bk9.fun/download/pinterest?url=${encodeURIComponent(pinterestUrl)}`);
+
+        if (!response.data.status) {
+            return reply('*❌ Failed to fetch data from Pinterest.*');
         }
 
-        const media = data.data;
-        const mediaUrl = media.medias[0].url; // වීඩියෝ හෝ පින්තූරයේ URL එක
-        const type = media.type; // 'image' හෝ 'video'
-        const title = media.title || "Pinterest Content";
+        const media = response.data.BK9;
+        
+        const desc = `*FIXO-XMD*
 
-        const caption = `╭━━❰ 📌 *PIN DOWNLOAD* ❱━━╮\n┃ 📝 Title: *${title}*\n┃ 🎥 Type: *${type.toUpperCase()}*\n╰━━━━━━━━━━━━━━━╯`;
+*PINS DOWNLOADER*
+╭━━❐━⪼
+┇๏ *Owner* - ${response.data.owner}
+╰━━❑━⪼
+> *© Pᴏᴡᴇʀᴇᴅ Bʏ 𝐅ɪxᴏ 𝐗ᴍᴅ ♡*`;
 
-        if (type === 'video') {
-            await conn.sendMessage(from, { video: { url: mediaUrl }, caption: caption }, { quoted: mek });
+        if (media && media.length > 0) {
+            const videoUrl = media.find(item => item.url.includes('.mp4'))?.url;
+            const imageUrl = media.find(item => item.url.includes('.jpg'))?.url;
+
+            if (videoUrl) {
+                await conn.sendMessage(from, { video: { url: videoUrl }, caption: desc }, { quoted: mek });
+            } else if (imageUrl) {
+                await conn.sendMessage(from, { image: { url: imageUrl }, caption: desc }, { quoted: mek });
+            } else {
+                reply('*❌ No media found.*');
+            }
         } else {
-            await conn.sendMessage(from, { image: { url: mediaUrl }, caption: caption }, { quoted: mek });
+            reply('*❌ No media found.*');
         }
-
-        await conn.sendMessage(from, { react: { text: '✅', key: mek.key } });
     } catch (e) {
-        console.error("Pinterest Download Error:", e);
-        reply('*❌ An error occurred. Please try again later.*');
+        reply('*❌ Error: ' + e.message + '*');
     }
 });
