@@ -7,7 +7,7 @@
     "start": "node index.js"
   },
   "dependencies": {
-   "@whiskeysockets/baileys": "^7.0.0-rc10",
+   "@whiskeysockets/baileys": "^7.0.0-rc14",
     "axios": "^1.17.0",
     "body-parser": "^1.20.2",
     "cors": "^2.8.6",
