@@ -18,7 +18,7 @@
     "path": "^0.12.7",
     "jimp": "1.6.1",
     "ytdl-core": "^4.11.5",
-    "node-telegram-bot-api": "^0.67.0",
+    "node-telegram-bot-api": "^2.1.0",
     "fs-extra": "^11.3.5",
     "pino": "^10.3.1",
     "@octokit/rest": "^22.0.1",
