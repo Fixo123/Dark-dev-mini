@@ -13,7 +13,7 @@ module.exports = {
     // 1. CONFIGURATION DE BASE (Session & Database)
     // ===========================================================
     SESSION_ID: process.env.SESSION_ID || "MINI BOT", 
-    MONGODB_URI: process.env.MONGODB_URI || 'mongodb+srv://nima:nima@nimabot.gkpbhvh.mongodb.net',
+    MONGODB_URI: process.env.MONGODB_URI || 'mongodb://mongo:hwVgDTiNclyZmxilGpWheyTgETFtoVLL@mongodb.railway.internal:27017',
     
     // ===========================================================
     // 2. INFORMATIONS DU BOT
